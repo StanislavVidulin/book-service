@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface PublisherRepository extends JpaRepository<Publisher, String> {
 
-    @Query("select distinct p.publisherName from Book b join b.publisher p join b.authors a where a.name=?1")
-    List<String> findPublishersByAuthor(String authorName);
+//    @Query("select distinct p.publisherName from Book b join b.publisher p join b.authors a where a.name=?1")
+//    List<String> findPublishersByAuthor(String authorName);
+
+    Stream<Publisher> findDistinctPublisherByBooksAuthorsNameIgnoreCase(String authorName);
 
     // убрать дубликаты: можно использовать вместо листа сет, а можно distinct
     // distinct лучше, он уберёт сразу на стороне базы данных, Set уберёт на серверной стороне

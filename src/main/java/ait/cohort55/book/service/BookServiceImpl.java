@@ -67,18 +67,18 @@ public class BookServiceImpl implements BookService {
         return modelMapper.map(book, BookDto.class);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Iterable<BookDto> findBooksByAuthor(String authorName) {
-        return bookRepository.findBooksByAuthorsNameIgnoreCase(authorName)
+        Author author = authorRepository.findById(authorName).orElseThrow(NotFoundException::new);
+        return author.getBooks().stream()
                 .map(b -> modelMapper.map(b, BookDto.class))
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     @Override
     public Iterable<BookDto> findBooksByPublisher(String publisherName) {
-        return bookRepository.findBooksByPublisherPublisherName(publisherName)
+        Publisher publisher = publisherRepository.findById(publisherName).orElseThrow(NotFoundException::new);
+        return publisher.getBooks().stream()
                 .map(b -> modelMapper.map(b, BookDto.class))
                 .toList();
     }
@@ -91,9 +91,12 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Iterable<String> findPublishersByAuthor(String authorName) {
-        return publisherRepository.findPublishersByAuthor(authorName);
+        return publisherRepository.findDistinctPublisherByBooksAuthorsNameIgnoreCase(authorName)
+                .map(Publisher::getPublisherName)
+                .toList();
     }
 
     @Transactional
@@ -102,7 +105,7 @@ public class BookServiceImpl implements BookService {
         Author author = authorRepository.findById(authorName).orElseThrow(NotFoundException::new);
 //        bookRepository.findBooksByAuthorsNameIgnoreCase(authorName)
 //                .forEach(b -> bookRepository.delete(b));
-        bookRepository.deleteBooksByAuthorsNameIgnoreCase(authorName);
+//        bookRepository.deleteBooksByAuthorsNameIgnoreCase(authorName);
         authorRepository.delete(author);
         return modelMapper.map(author, AuthorDto.class);
     }
